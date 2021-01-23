@@ -4,7 +4,7 @@
 spmdir = 'D:\Mat_lab\toolbox\spm12';
 
 % Open SPM
-%spm fmri
+spm fmri
 
 % Add Job directory to path
 addpath('D:\Studies\Gaston\scripts_fmri\my_scripts\batch') %% can be changed
@@ -13,7 +13,7 @@ addpath('D:\Studies\Gaston\scripts_fmri\my_scripts\batch') %% can be changed
 studydir = 'D:\Studies\Gaston\fmri_data\test_pilot'; %% can be changed
 
 % Subjects 
-subj = {'P01';'P02';'P03';'P04'}; %% can be changed
+subj = {'P04'}; %% can be changed
 
 % Data within subject's directory
 data = 'fmri'; %% can be changed
@@ -48,7 +48,7 @@ for i=1:length(subj) % loop across subjects
         % encapsulate each file path in one cell as a character vectors
         clear funcImagesX % remove from workspace
         
-        load D:\Studies\Gaston\scripts_fmri\my_scripts\batch\estimate_reslice_job.mat; % Load variable matlabbatch.
+        load D:\Studies\Gaston\scripts_fmri\my_scripts\batch\realignment_job.mat; % Load variable matlabbatch.
         % matlabbatch is a cell that contain a structure. matlabbatch{1} is
         % a structure with fields.
         
@@ -73,6 +73,115 @@ for i=1:length(subj) % loop across subjects
         %         spm_jobman ('run', matlabbatch)
         
         
-        %%%%% Coregister
+        %%%%% Coregisteration
+        cd(rundir)
+        clear matlabbatch
+        scanCO1 = dir( fullfile(rundir,'meanf*.nii') ); % Get the reference scan information in a structure
+        scanCO1 = [rundir,'\',scanCO1.name]; % Get the path to my mean functional image
+        scanCO1 = cellstr(scanCO1); % Convert the path (character vector) to a cell containing a character vector
+        
+        cd(structdir)
+        scanCO2 = dir ( fullfile(structdir, 's*.nii') ); % Get the T1 scan info in a structure
+        scanCO2 = [structdir,'\',scanCO2(1).name]; % Get the path to my structural image
+        scanCO2 = cellstr(scanCO2);
+        
+        load D:\Studies\Gaston\scripts_fmri\my_scripts\batch\coregistration_job.mat % load matlabbatch var
+        cd(rundir)
+        matlabbatch{1}.spm.spatial.coreg.estwrite.ref = scanCO1;
+        matlabbatch{1}.spm.spatial.coreg.estwrite.source = scanCO2;
+        spm_jobman('run', matlabbatch);
+        
+        %%%%% Segmentation
+        
+        cd(rundir)
+        clear matlabbatch
+        scanSE = dir( fullfile(structdir,'rs*.nii') );
+        scanSE = [structdir,'\',scanSE.name];
+        scanSE = cellstr(scanSE);
+        
+        load D:\Studies\Gaston\scripts_fmri\my_scripts\batch\segmentation_job.mat;
+        cd(rundir)
+        matlabbatch{1}.spm.spatial.preproc.channel.vols = scanSE;
+        spm_jobman('run', matlabbatch)
+        
+        %%%%% Normalization
+        
+        % Get the deformation field
+        clear matlabbatch
+        cd(structdir)
+        scanT1Def = dir( fullfile(structdir,'y*.nii') );
+        scanT1Def = [structdir,'\',scanT1Def.name];
+        scanT1Def = cellstr(scanT1Def);
+        
+        % Get the realigned functional images to write
+        cd(rundir)
+        images2write = dir( fullfile(rundir,'r*.nii') ); % We now have a structure with many elements
+        
+        % Loop through each element and get the name of it in a character
+        % array
+        
+       for j=1:length(images2write)
+           images2writeX(j,:)= [rundir,'\',images2write(j).name];
+       end
+       
+      images2write = images2writeX;
+      images2write = cellstr(images2write);
+      clear images2writeX
+      
+      load D:\Studies\Gaston\scripts_fmri\my_scripts\batch\normalization_job.mat
+      matlabbatch{1}.spm.spatial.normalise.write.subj.def = scanT1Def;
+      matlabbatch{1}.spm.spatial.normalise.write.subj.resample = images2write;
+      spm_jobman('run', matlabbatch);
+      
+       
+       %%%%% Smoothing
+       clear matlabbatch
+       scanSMOOTH = dir( fullfile(rundir, 'wrf*.nii') );
+       for j=1:length(scanSMOOTH)
+           scanSMOOTHX(j,:)=[rundir,'\',scanSMOOTH(j).name];
+       end
+       
+       scanSMOOTH = cellstr(scanSMOOTHX);
+       clear scanSMOOTHX
+       
+       load D:\Studies\Gaston\scripts_fmri\my_scripts\batch\smoothing_job.mat;
+       cd (rundir)
+       matlabbatch{1}.spm.spatial.smooth.data = scanSMOOTH;
+       spm_jobman('run', matlabbatch);
+       
+    end
+end
+
+      
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+       
+      
+           
+           
+           
+           
+           
+           
+           
+        
+        
+        
+        
+        
+        
+        
+        
+        
        
 

@@ -1,7 +1,7 @@
 # Preprocessing_fmri
 * This script will allow you to accomplish usual preprocessing steps (Realignement, Slice-timing, Coregistration, Segmentation, Normalization and Smoothing) for functional magnetic resonance (fMRI) images in an automated way.  
   
-  * It is based on SPM toolbox that runs on MATLAB.  
+* It is based on SPM toolbox that runs on MATLAB.  
     
 ## The logic behind spm scripting
  * SPM uses a batch editor that allows to implement each step (or multiple steps) for as many Sessions (runs) as we would like.  
