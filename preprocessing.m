@@ -4,22 +4,22 @@
 spmdir = 'D:\Mat_lab\toolbox\spm12';
 
 % Open SPM
-spm fmri
+%spm fmri
 
 % Add Job directory to path
-addpath('job dir') %??
+addpath('D:\Studies\Gaston\scripts_fmri\my_scripts\batch') %% can be changed
 
 % Data directory
-studydir = 'D:\Studies\Gaston\fmri_data\test_pilot';
+studydir = 'D:\Studies\Gaston\fmri_data\test_pilot'; %% can be changed
 
 % Subjects 
-subj = {'P01';'P02';'P03';'P04'}; %??
+subj = {'P01';'P02';'P03';'P04'}; %% can be changed
 
 % Data within subject's directory
-data = 'fmri';
+data = 'fmri'; %% can be changed
 
 % Runs directory
-run = {'run1';'run2';'run3';'run4'}; %??
+run = {'run1';'run2';'run3';'run4'}; %% can be changed
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%
