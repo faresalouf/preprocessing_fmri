@@ -52,7 +52,7 @@ for i=1:length(subj) % loop across subjects
         % matlabbatch is a cell that contain a structure. matlabbatch{1} is
         % a structure with fields.
         
-        matlabbatch{1}.spm.spatial.realign.estwrite.data{1,1} = funcImages; % Change the data field to
+        matlabbatch{1}.spm.spatial.realign.estwrite.data{1,1}= funcImages; % Change the data field to
         % the data of interest
         
         spm_jobman('run', matlabbatch);
@@ -82,20 +82,20 @@ for i=1:length(subj) % loop across subjects
         
         cd(structdir)
         scanCO2 = dir ( fullfile(structdir, 's*.nii') ); % Get the T1 scan info in a structure
-        scanCO2 = [structdir,'\',scanCO2(1).name]; % Get the path to my structural image
+        scanCO2 = [structdir,'\',scanCO2.name]; % Get the path to my structural image
         scanCO2 = cellstr(scanCO2);
         
         load D:\Studies\Gaston\scripts_fmri\my_scripts\batch\coregistration_job.mat % load matlabbatch var
         cd(rundir)
-        matlabbatch{1}.spm.spatial.coreg.estwrite.ref = scanCO1;
-        matlabbatch{1}.spm.spatial.coreg.estwrite.source = scanCO2;
+        matlabbatch{1}.spm.spatial.coreg.estimate.ref = scanCO1;
+        matlabbatch{1}.spm.spatial.coreg.estimate.source = scanCO2;
         spm_jobman('run', matlabbatch);
         
         %%%%% Segmentation
         
         cd(rundir)
         clear matlabbatch
-        scanSE = dir( fullfile(structdir,'rs*.nii') );
+        scanSE = dir( fullfile(structdir,'s*.nii') );
         scanSE = [structdir,'\',scanSE.name];
         scanSE = cellstr(scanSE);
         
@@ -109,13 +109,13 @@ for i=1:length(subj) % loop across subjects
         % Get the deformation field
         clear matlabbatch
         cd(structdir)
-        scanT1Def = dir( fullfile(structdir,'y*.nii') );
-        scanT1Def = [structdir,'\',scanT1Def.name];
-        scanT1Def = cellstr(scanT1Def);
+        scanT1 = dir( fullfile(structdir,'s*.nii') );
+        scanT1 = [structdir,'\',scanT1.name];
+        scanT1 = cellstr(scanT1);
         
         % Get the realigned functional images to write
         cd(rundir)
-        images2write = dir( fullfile(rundir,'r*.nii') ); % We now have a structure with many elements
+        images2write = dir( fullfile(rundir,'rf*.nii') ); % We now have a structure with many elements
         
         % Loop through each element and get the name of it in a character
         % array
@@ -129,8 +129,8 @@ for i=1:length(subj) % loop across subjects
       clear images2writeX
       
       load D:\Studies\Gaston\scripts_fmri\my_scripts\batch\normalization_job.mat
-      matlabbatch{1}.spm.spatial.normalise.write.subj.def = scanT1Def;
-      matlabbatch{1}.spm.spatial.normalise.write.subj.resample = images2write;
+      matlabbatch{1}.spm.spatial.normalise.estwrite.subj.vol = scanT1;
+      matlabbatch{1}.spm.spatial.normalise.estwrite.subj.resample = images2write;
       spm_jobman('run', matlabbatch);
       
        
@@ -147,6 +147,10 @@ for i=1:length(subj) % loop across subjects
        load D:\Studies\Gaston\scripts_fmri\my_scripts\batch\smoothing_job.mat;
        cd (rundir)
        matlabbatch{1}.spm.spatial.smooth.data = scanSMOOTH;
+       matlabbatch{1}.spm.spatial.smooth.fwhm = [8 8 8];
+       matlabbatch{1}.spm.spatial.smooth.dtype = 0;
+       matlabbatch{1}.spm.spatial.smooth.im = 0;
+       matlabbatch{1}.spm.spatial.smooth.prefix = 'S';
        spm_jobman('run', matlabbatch);
        
     end
